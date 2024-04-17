@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Vehículos</title>
+</head>
+<body>
+
+    <form>
+        Placa:<input type="text" id="txtPlaca"><br>
+        Marca:<input type="text" id="txtMarca"><br>
+        Modelo:<input type="text" id="txtModelo"><br>
+        <button type="button" id="btnList">Listar</button>
+        <button type="button" id="btnBuscar">Buscar</button>
+        <button type="button" id="btnAdd">Agregar</button>
+        <button type="button" id="btnDel">Eliminar</button>
+    </form>
+    <div id="res"></div>
+
+<script>
+const btnList = document.getElementById('btnList');
+btnList.addEventListener('click', () => {
+    fetch('http://localhost:3000/vehiculos')
+    .then(response => response.json())
+    .then(data => {
+        let res = document.getElementById('res');
+        let html = '';
+        data.vehiculos.forEach(v => {
+            html += `<p>Placa: ${v.placa}, Marca: ${v.marca}, Modelo: ${v.modelo}</p>`;
+        });
+        res.innerHTML = html;
+    });
+});
+
+const btnBuscar = document.getElementById('btnBuscar');
+btnBuscar.addEventListener('click', () => {
+    let placa = document.getElementById('txtPlaca').value;
+    fetch(`http://localhost:3000/vehiculos/${placa}`)
+    .then(response => response.json())
+    .then(data => {
+        let res = document.getElementById('res');
+        if (data.vehiculo) {
+            res.innerText = `Vehículo encontrado: Placa: ${data.vehiculo.placa}, Marca: ${data.vehiculo.marca}, Modelo: ${data.vehiculo.modelo}`;
+        } else {
+            res.innerText = 'Vehículo no encontrado.';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+const btnAdd = document.getElementById('btnAdd');
+btnAdd.addEventListener('click', () => {
+    let placa = document.getElementById('txtPlaca').value;
+    let marca = document.getElementById('txtMarca').value;
+    let modelo = document.getElementById('txtModelo').value;
+    fetch('http://localhost:3000/vehiculos', {
+        method: 'POST',
+        body: JSON.stringify({ placa, marca, modelo }),
+        headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('res').innerText = data.message;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+const btnDel = document.getElementById('btnDel');
+btnDel.addEventListener('click', () => {
+    let placa = document.getElementById('txtPlaca').value;
+    fetch(`http://localhost:3000/vehiculos/${placa}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('res').innerText = data.message;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+</script>
+</body>
+</html>
